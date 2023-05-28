@@ -1,6 +1,5 @@
 import socket
 import time
-import subprocess
 
 local_host = '127.0.0.1'
 timer_port = 3000
@@ -19,7 +18,6 @@ def main():
 
         sock.setblocking(False)
         timer_sock.setblocking(False)
-
         status = ""
         s_time = None
         timer_on = False
@@ -34,7 +32,6 @@ def main():
             elif status == TIMER_OFF:
                 timer_on = False
             if timer_on and time.time() - s_time > 10:
-                print("overtime")
                 timer_sock.send("overtime".encode())
                 sock.close()
                 timer_sock.close()

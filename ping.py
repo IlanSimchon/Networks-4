@@ -6,7 +6,6 @@ import time
 import statistics as stats
 
 ICMP_ECHO_REQUEST = 8
-ICMP_ECHO_CODE = 0
 ICMP_ECHO_REPLY = 0
 PACKET_SIZE = 64
 
@@ -36,6 +35,7 @@ def checksum(data):
 
 def receive_ping(sock, count, host_ip):
     OK = False
+    sleeping = 1
 
     count_rece = 0
     start_time = time.time()
@@ -69,20 +69,22 @@ def send_ping(host_ip):
     count_cmp = 0
     count = 0
     count_recev = 0
+
     s_time = time.time()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
 
     sock.setblocking(False)
+
     try:
         while True:
             count_cmp += 1
-            packet = struct.pack('!BBHHH', ICMP_ECHO_REQUEST, ICMP_ECHO_CODE, 0, 0, count_cmp)
+            packet = struct.pack('!BBHHH', ICMP_ECHO_REQUEST, 0, 0, 0, count_cmp)
             data = b"this is my massage"
 
             calc_checksum = checksum(packet + data)
 
-            packet = struct.pack('!BBHHH', ICMP_ECHO_REQUEST, ICMP_ECHO_CODE, calc_checksum, 0, count_cmp)
+            packet = struct.pack('!BBHHH', ICMP_ECHO_REQUEST, 0, calc_checksum, 0, count_cmp)
 
 
             to_send = packet + data
@@ -104,7 +106,8 @@ def send_ping(host_ip):
         f_time = time.time() - s_time
 
         print(f"\n--- {host_ip} ping statistics ---")
-        print(f"{count} packets transmitted, {count_recev} received, {int((1 - (count_recev / count)) * 100)}% packet loss, time {int(f_time * 1000)}ms")
+        print(f"{count} packets transmitted, {count_recev} received,"
+              f" {int((1 - (count_recev / count)) * 100)}% packet loss, time {int(f_time * 1000)}ms")
         if count_recev != 0:
             Min = min(times)
             avg = stats.mean(times)
